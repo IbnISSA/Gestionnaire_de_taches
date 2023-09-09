@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <link
+      rel="stylesheet"
+      href="https://bootswatch.com/5/solar/bootstrap.min.css"
+    />
+    <title>Tasks List</title>
+    <style>
+      .center-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+    </style>
+  </head>
+  <body>
+    {% if user.is_authenticated %}
+    <div class="container mt-5">
+      <p style="text-align:center;">Welcome, {{ user.username }}!</p>
+      <h2>Tasks List</h2>
+      <form method="get">
+        <div class="form-group">
+          <label for="id_status">Filter by status :</label>
+          <select name="status" id="id_status" class="form-control">
+            <option value="">All</option>
+            <option value="1">Completed</option>
+            <option value="0">Not Completed</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+      </form>
+
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+            <th scope="col">Finished At</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ task.Title }}</td>
+            <td>{{ task.Description }}</td>
+            <td>{{ task.Finished_at }}</td>
+            <td>
+              {% if task.Completed %}Completed{% else %}Not Completed{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'update_task' task.id %}">Update</a>
+              <a
+                href="#"
+                data-toggle="modal"
+                data-target="#confirmation-modal-{{ task.id }}"
+                >Delete</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <a href="{% url 'download_task_json' %}" class="btn btn-success mt-3 "
+        >Download Tasks in JSON format</a
+      >
+      <a href="{% url 'download_task_csv' %}" class="btn btn-outline-primary mt-3"
+        >Download Tasks in CSV format</a
+      >
+
+      <button
+        type="button"
+        class="btn btn-primary mt-3"
+        data-toggle="modal"
+        data-target="#create-task-modal"
+      >
+        Add a task
+      </button>
+
+      {% for task in tasks %}
+      <div
+        class="modal fade flex-direction-column"
+        id="update-modal-{{ task.id }}"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="modifier-modal-label-{{ task.id }}"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="update-modal-label-{{ task.id }}">
+                Modify the task
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form
+                method="post"
+                action="{% url 'update_task' task.id %}"
+              >
+                {% csrf_token %} {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">
+                  Update
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="confirmation-modal-{{ task.id }}"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="confirmation-modal-label-{{ task.id }}"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5
+                class="modal-title"
+                id="confirmation-modal-label-{{ task.id }}"
+              >
+                Confirmation of Delete
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to delete this task?</p>
+              <form method="post" action="{% url 'delete_task' task.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                  Confirm the delete
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div
+        class="modal fade"
+        id="create-task-modal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="create-task-modal-label"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="create-task-modal-label">
+                Create a Task
+              </h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body mb-3">
+              <form method="post" action="{% url 'create_task' %}">
+                {% csrf_token %}
+                <div class="form-group mb-3">
+                  <label for="{{ form.Title.id_for_label }}">Title :</label>
+                  {{ form.Title }}
+                </div>
+                <div class="form-group">
+                  <label for="{{ form.Description.id_for_label }}"
+                    >Description :</label
+                  >
+                  {{ form.Description }}
+                </div>
+                <div class="form-group">
+                  <label for="{{ form.Finished_at.id_for_label }}">Finished at:</label>
+                  <input type="date" id="{{ form.Finished_at.id_for_label }}" name="{{ form.Finished_at.name }}" value="{{ form.Finished_at.value }}" class="form-control">
+              </div>
+              
+                <button type="submit" class="btn btn-primary">Create</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="{% url 'logout' %}" class="btn btn-danger mt-3"
+        >Logout</a
+      >
+    </div>
+    {% else %}
+    <div class="center-box">
+      <div class="card">
+        <div class="card-body button-container">
+          <h2>Select an action :</h2>
+          <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+          <a href="{% url 'register' %}" class="btn btn-success"
+            >Register</a
+          >
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+      integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

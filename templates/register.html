@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <link
+      rel="stylesheet"
+      href="https://bootswatch.com/5/solar/bootstrap.min.css"
+    />
+    <title>Registration</title>
+    <style>
+      .center-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      button {
+        margin-top: 10px;
+      }
+      .error-message {
+        color: red;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="center-box">
+      <div class="card">
+        <div class="card-body button-container text-center">
+          <h4 class="card-title">Registration</h4>
+          <form method="post" onsubmit="return validateForm()">
+            {% csrf_token %}
+            <div class="form-group text-left">
+              <label for="{{ form.username.id_for_label }}">Username :</label>
+              {{ form.username }}
+            </div>
+            <div class="form-group text-left">
+              <label for="{{ form.password1.id_for_label }}">Password :</label>
+              {{ form.password1 }}
+            </div>
+            <div class="form-group text-left">
+              <label for="{{ form.password2.id_for_label }}"
+                >Confirm your password :</label
+              >
+              {{ form.password2 }}
+            </div>
+            <div id="password-error" class="error-message"></div>
+            <button type="submit" class="btn btn-primary">Register</button>
+          </form>
+          <p>
+            Already Have an account ?
+            <a href="{% url 'login' %}">Sign In Here!</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+      integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      function validateForm() {
+        var password1 = document.getElementById("id_password1").value;
+        var password2 = document.getElementById("id_password2").value;
+        var passwordError = document.getElementById("password-error");
+
+        if (password1 !== password2) {
+          passwordError.innerHTML = "Password doesn't match!!";
+          return false;
+        } else if (password1.length < 8) {
+          passwordError.innerHTML =
+            "The password is too short (minimum 8 characters).";
+          return false;
+        } else {
+          passwordError.innerHTML = "";
+          return true;
+        }
+      }
+    </script>
+  </body>
+</html>
